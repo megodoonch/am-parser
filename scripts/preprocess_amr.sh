@@ -83,9 +83,9 @@ testAltodata=$outputPath/alto/test/
 alto="am-tools.jar"
 
 if [ -f "$alto" ]; then
-    echo "jar file found at $jar"
+    echo "jar file found at $alto"
 else
-    echo "jar file not found at $jar, downloading it!"
+    echo "jar file not found at $alto, downloading it!"
     wget -O "$alto" http://www.coli.uni-saarland.de/projects/amparser/am-tools.jar
 fi
 
@@ -232,33 +232,36 @@ printf "\nGenerate empty amconll test data\n"
 eval $emptyTestAmconllCMD
 
 #create correct directory structure
-mkdir -p $outputPath/output/train
-mkdir -p $outputPath/output/dev
-mkdir -p $outputPath/output/gold-dev
-mkdir -p $outputPath/output/test
+output_subdir="output"
 
-mv $outputPath/train.amconll "$outputPath/output/train/"
-mv $outputPath/gold-dev.amconll "$outputPath/output/gold-dev/"
-mv $outputPath/dev.amconll "$outputPath/output/dev/"
-mv $outputPath/test.amconll "$outputPath/output/test/"
+mkdir -p $outputPath/$output_subdir/train
+mkdir -p $outputPath/$output_subdir/dev
+mkdir -p $outputPath/$output_subdir/gold-dev
+mkdir -p $outputPath/$output_subdir/test
+
+mv $outputPath/train.amconll "$outputPath/$output_subdir/train/"
+mv $outputPath/gold-dev.amconll "$outputPath/$output_subdir/gold-dev/"
+mv $outputPath/dev.amconll "$outputPath/$output_subdir/dev/"
+mv $outputPath/test.amconll "$outputPath/$output_subdir/test/"
 
 #gold AMRs, create an empty line after each graph
-sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/alto/dev/raw.amr" > "$outputPath/output/dev/goldAMR.txt"
-sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/nnData/test/goldAMR.txt" > "$outputPath/output/test/goldAMR.txt"
+sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/alto/dev/raw.amr" > "$outputPath/$output_subdir/dev/goldAMR.txt"
+sed ':a;N;$!ba;s/\n/\n\n/g' "$outputPath/nnData/test/goldAMR.txt" > "$outputPath/$output_subdir/test/goldAMR.txt"
 
 
 #collect lookup data:
-mkdir -p "$outputPath/output/lookup"
+mkdir -p "$outputPath/$output_subdir/lookup"
 
 for file in nameLookup.txt nameTypeLookup.txt wikiLookup.txt words2labelsLookup.txt
 do
-    cp "$outputPath/alto/train/$file" "$outputPath/output/lookup/$file"
+    cp "$outputPath/alto/train/$file" "$outputPath/$output_subdir/lookup/$file"
 done
 
 
 
 
 printf "\neverything is in $outputPath\n"
+printf "\namconll files are in $outputPath/$output_subdir"
 
 
 

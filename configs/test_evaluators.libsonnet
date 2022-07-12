@@ -96,6 +96,24 @@ function (dataset_reader, data_iterator) {
 
   }]],
 
+    "AMR-example" :  [ ["AMR-example",{ #prefix used for evaluation metric
+        "type": "standard_evaluator",
+        "formalism" : "AMR-example",
+        "system_input" : "data/AMR/example/output/test/test.amconll",
+        "gold_file": "data/AMR/example/output/test/goldAMR.txt",
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader,
+                "data_iterator" : data_iterator,
+                "k" : k,
+                "threads" : 8,
+                "give_up": give_up,
+                "evaluation_command" : eval_commands['commands']['AMR-example']  # TODO MF should this be 2017?
+        }
+
+  }]],
+
+
       "AMR-2020" :  [ ["AMR-2020",{ #prefix used for evaluation metric
           "type": "standard_evaluator",
           "formalism" : "AMR-2020",

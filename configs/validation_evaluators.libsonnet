@@ -81,6 +81,43 @@ function (dataset_reader, data_iterator) {
 
   },
 
+    "AMR-example" :  {
+        "type": "standard_evaluator",
+        "formalism" : "AMR-example",
+        "system_input" : "data/AMR/example/output/dev/dev.amconll",
+        "gold_file": "data/AMR/example/output/dev/goldAMR.txt",
+        "use_from_epoch" : 10,
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : 4,
+                "give_up": give_up, #retry with smaller k
+                "evaluation_command" : eval_commands['commands']['AMR-example']
+        }
+
+  },
+
+    "LittlePrince" :  {
+        "type": "standard_evaluator",
+        "formalism" : "LittlePrince",
+        "system_input" : "data/AMR/little-prince/output/dev/dev.amconll",
+        "gold_file": "data/AMR/little-prince/output/dev/goldAMR.txt",
+        "use_from_epoch" : 10,
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader, #same dataset_reader as above.
+                "data_iterator" : data_iterator, #same bucket iterator also for validation.
+                "k" : k,
+                "threads" : 4,
+                "give_up": give_up, #retry with smaller k
+                "evaluation_command" : eval_commands['commands']['LittlePrince']
+        }
+
+  },
+
+
       "AMR-2020" :  {
           "type": "standard_evaluator",
           "formalism" : "AMR-2020",

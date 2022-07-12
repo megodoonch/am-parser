@@ -2,11 +2,12 @@ local ALTO_PATH = "am-tools.jar";
 
 local WORDNET = "downloaded_models/wordnet3.0/dict/";
 
-local CONCEPTNET = "/proj/irtg.shadow/data/conceptnet-assertions-5.7.0.csv.gz";
+# not downloaded by Dockerfile or any AMR-related scripts (and not needed by latter)
+local CONCEPTNET = "other_tools/conceptnet-assertions-5.7.0.csv.gz";
+local MTOOL = "other_tools/mtool/main.py";
 
-
-local MTOOL = "/proj/irtg.shadow/tools/mtool/main.py";
-local base_directory = "/local/mlinde/am-parser";
+# prefix for e.g. external_eval_tools
+local base_directory = ".";  # "/local/mlinde/am-parser";
 
 local tool_dir = base_directory + "/external_eval_tools/";
 
@@ -28,6 +29,8 @@ local sdp_regexes = {
   "am-tools" : ALTO_PATH,
 
   "extra_dependencies" : {
+    "AMR-example" : [WORDNET],  # toy corpus
+    "LittlePrince" : [WORDNET],
     "AMR-2015" : [WORDNET],
     "AMR-2017" : [WORDNET],
     "MRP-DM" : [MTOOL],
@@ -75,6 +78,26 @@ local sdp_regexes = {
             "type" : "bash_evaluation_command",
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
                 ' --lookup data/AMR/2017/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
+        },
+
+        "AMR-example" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/example/output/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
+        },
+
+        "LittlePrince" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/little-prince/output/lookup/ --th 10' +
             '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
             "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
                                 "R" : [1, "Recall: (?P<value>.+)"],
@@ -142,6 +165,8 @@ local sdp_regexes = {
         "AMR-2015": "+AMR-2015_F",
         "AMR-2017": "+AMR-2017_F",
         "AMR-2020": "+AMR-2020_F",
+        "AMR-example": "+AMR-example_F",
+        "LittlePrince": "+LittlePrince_F",
 
         "MRP-DM" : "+MRP-DM_mrp_all_f",
         "MRP-PSD" : "+MRP-PSD_mrp_all_f",
@@ -157,7 +182,7 @@ local sdp_regexes = {
 
     },
 
-    #MRP postprocessing command instead of full evaluation command because we don't have gold graphs:
+    # MRP postprocessing command instead of full evaluation command because we don't have gold graphs:
     "postprocessing" : {
         "MRP-DM" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],
         "MRP-PSD" : ['java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.mrp.tools.EvaluateMRP --corpus {system_output} --out {system_output}.mrp --input data/MRP/test/input.mrp'],

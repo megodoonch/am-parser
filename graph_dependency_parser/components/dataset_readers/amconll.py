@@ -40,10 +40,12 @@ class AMConllDatasetReader(DatasetReader):
     """
     Reads a file in amconll format containing AM dependency trees.
 
-    Parameters
+    Attributes
     ----------
-    token_indexers : ``Dict[str, TokenIndexer]``, optional (default=``{"tokens": SingleIdTokenIndexer()}``)
-        The token indexers to be applied to the words TextField.
+        _token_indexers : ``Dict[str, TokenIndexer]``, optional (default=``{"tokens": SingleIdTokenIndexer()}``)
+                            The token indexers to be applied to the words TextField.
+        fraction : float (default 1.0)
+
     """
     def __init__(self,
                  token_indexers: Dict[str, TokenIndexer] = None,

@@ -148,10 +148,11 @@ params.to_file(os.path.join(serialization_dir, CONFIG_NAME))
 
 evaluate_on_test = params.pop_bool("evaluate_on_test", False)
 
-test_evaluators = params.pop("test_evaluators",[])
-test_evaluators : List[Tuple[str, Evaluator]] = [(name, Evaluator.from_params(evaluator)) for formalism in test_evaluators for name, evaluator in formalism]
-if len(test_evaluators) == 0:
-    logger.warning("No test evaluators were given, after training, there will be no evaluation on a test set.")
+if evaluate_on_test:
+    test_evaluators = params.pop("test_evaluators",[])
+    test_evaluators : List[Tuple[str, Evaluator]] = [(name, Evaluator.from_params(evaluator)) for formalism in test_evaluators for name, evaluator in formalism]
+    if len(test_evaluators) == 0:
+        logger.warning("No test evaluators were given, after training, there will be no evaluation on a test set.")
 
 trainer_type = params.get("trainer", {}).get("type", "default")
 
@@ -180,7 +181,7 @@ eval_commands = json.loads(_jsonnet.evaluate_file("configs/eval_commands.libsonn
 if not os.path.exists(eval_commands["am-tools"]):
     raise ConfigurationError(f"Could not find am-tools, file {eval_commands['am-tools']} does not exist")
 
-#Check extra dependencies such as wordnet
+# Check extra dependencies such as wordnet
 
 for formalism in trainer.model.tasks.keys():
     if formalism in eval_commands["extra_dependencies"]:
@@ -200,16 +201,18 @@ if args.comet is not None:
     code += args.overrides
     experiment.set_code(code, overwrite=True)
     code_data = json.loads(_jsonnet.evaluate_file(args.param_path))
-    experiment.log_parameter("bert","bert" in code_data["dataset_reader"]["token_indexers"])
+    experiment.log_parameter("pre-trained word embeddings", len(code_data["dataset_reader"]["token_indexers"]) > 0)
+    experiment.log_parameter("bert", "bert" in code_data["dataset_reader"]["token_indexers"])
     experiment.log_parameter("elmo", "elmo" in code_data["dataset_reader"]["token_indexers"])
-    experiment.log_parameter("model_directory",serialization_dir)
-    experiment.log_parameter("cuda_device",cuda_device)
-    experiment.log_parameter("corpora",code_data["iterator"]["formalisms"])
-    experiment.log_parameter("encoder",code_data["model"]["encoder"]["type"])
-    experiment.log_parameter("hostname",socket.gethostname())
-    experiment.log_parameter("random_seed",random_seed) #random_seed, numpy_seed, pytorch_seed
-    experiment.log_parameter("numpy_seed",numpy_seed) #random_seed, numpy_seed, pytorch_seed
-    experiment.log_parameter("pytorch_seed",pytorch_seed) #random_seed, numpy_seed, pytorch_seed
+    experiment.log_parameter("glove", "glove" in code_data["dataset_reader"]["token_indexers"])
+    experiment.log_parameter("model_directory", serialization_dir)
+    experiment.log_parameter("cuda_device", cuda_device)
+    experiment.log_parameter("corpora", code_data["iterator"]["formalisms"])
+    experiment.log_parameter("encoder", code_data["model"]["encoder"]["type"])
+    experiment.log_parameter("hostname", socket.gethostname())
+    experiment.log_parameter("random_seed", random_seed)  # random_seed, numpy_seed, pytorch_seed
+    experiment.log_parameter("numpy_seed", numpy_seed)  # random_seed, numpy_seed, pytorch_seed
+    experiment.log_parameter("pytorch_seed", pytorch_seed)  # random_seed, numpy_seed, pytorch_seed
 else:
     experiment = None
 
