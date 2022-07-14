@@ -41,7 +41,7 @@ The am-tools.jar here is Bart's
 
 * Run docker container (start a screen first!) with or without gpu enabled:
     ```bash
-    docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container am-parser bash
+    docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container am-parser bash
     docker run -v ~/data/volume_2/data:/am-parser-app/data --gpus all -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container-gpu am-parser bash
     ```
 * test with toy example. consider detaching and looking in ~/data/volume for the data and models it should have written:
@@ -52,23 +52,21 @@ preprocess:
 mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
 ```
 
-train on GPU:
+train on CPU, plus some more overrides for illustrative purposes:
+
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging "{trainer: {\"num_epochs\": 2, \"patience\" : null, \"cuda_device\": -1, }}"   2>&1 | tee logfiles/example/training.log
 ```
 
-train on CPU, plus some more overrides for illustrative purposes:
+train on GPU:
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 ```
 
-predict:
-
-
 ```bash
-bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o parser_output/example/AMR/predict -m models/AMR/example/model.tar.gz &> logfiles/example/predict.log
+mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/little_prince.jsonnet -s models/AMR/little_prince --comet TF1YGwKocUp9x5RcMoguhhCuf --project am-parser -f --file-friendly-logging 2>&1 | tee logfiles/little_prince/training.log
 ```
 
 
@@ -77,7 +75,7 @@ bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o 
 ### scripts for Little Prince
 
 ```bash
-time bash scripts/preprocess_amr.sh -d example/decomposition/amr-lprince/ -o data/AMR/lprince &> data/AMR/lprince/preprocessing.log
+mkdir -p logfiles/lprince && time bash scripts/preprocess_amr.sh -d example/decomposition/amr-lprince/ -o data/AMR/lprince  2>&1 | tee logfiles/example/preprocessing.log
 
 python -u train.py jsonnets/single/bert/AMR-2017.jsonnet -s data/AMR/lprince/model  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  -1  } }' &> data/AMR/lprince/training.log
 
