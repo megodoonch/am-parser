@@ -5,7 +5,7 @@ FROM openjdk:11
 ENV PATH="/root/miniconda3/bin:${PATH}"
 ARG PATH="/root/miniconda3/bin:${PATH}"
 
-LABEL maintainer="tprakap@coli.uni-saarland.de"
+LABEL maintainer="m.fowlie@uu.nl"
 
 # install required utils
 RUN apt-get -y update
