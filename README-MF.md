@@ -8,9 +8,11 @@ The am-tools.jar here is Bart's
 * start a screen with `screen`
 * see what docker containers are already in existence
   `docker ps -a`
-* currently, `am-parser-container-gpu` exists and is fully up to date
+* currently, `am-parser-container-gpu` exists but is not fully up to date
+  * missing the updated config files for the morpheme model
 * if it's running, attach: `docker attach am-parser-container-gpu`
 * if it's stopped, start it `docker start am-parser-container-gpu` and then attach
+* if you need to remake it, see below, specifically `git pull` and `docker build...` and `docker run...`
 * you should now be in a new terminal starting with `#` instead of `$`.
 * check the location of your preprocessed corpus. Let's suppose the path is `data/AMR/morphemes`.
 * get your comet token from the website (it's in your profile).
