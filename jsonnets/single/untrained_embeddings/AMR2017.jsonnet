@@ -6,7 +6,7 @@ local evaluate_on_test = false;
 
 # Maximum number of epochs to train for
 # when testing things out, eventually use a number higher than 10 because before that, Smatch evaluation isn't run
-local num_epochs = 12;
+local num_epochs = 100;
 
 # early stopping
 # number of epochs to keep training despite not seeing an improvement in dev score
@@ -18,11 +18,11 @@ local device = 0;
 # local device = -1;  # for CPU only
 
 # paths to the rest of the configuration files
-local test_evaluators = import '../../configs/test_evaluators.libsonnet';
-local data_paths = import '../../configs/data_paths.libsonnet';
-local eval_commands = import '../../configs/eval_commands.libsonnet';
+local test_evaluators = import '../../../configs/test_evaluators.libsonnet';
+local data_paths = import '../../../configs/data_paths.libsonnet';
+local eval_commands = import '../../../configs/eval_commands.libsonnet';
 local UD_banks = data_paths["UD_banks"];
-local task_models = import '../../configs/task_models.libsonnet';
+local task_models = import '../../../configs/task_models.libsonnet';
 
 
 #=========FREDA=========
@@ -39,8 +39,8 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 
 #============TASKS==============
-local my_tasks = ["LittlePrince"];
-local main_task = "LittlePrince";  # what validation metric to pay attention to.
+local my_tasks = ["AMR2017"];
+local main_task = "AMR2017";  # what validation metric to pay attention to.
 #===============================
 
 local dataset_reader = {
