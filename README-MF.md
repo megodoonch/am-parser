@@ -62,12 +62,34 @@ mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.js
 train on GPU:
 
 ```bash
-`mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log`
+mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 ```
 
 ```bash
 mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/little_prince.jsonnet -s models/AMR/little_prince --comet <comet token> --project am-parser -f --file-friendly-logging 2>&1 | tee logfiles/little_prince/training.log
 ```
+
+#### Real baseline corpus
+
+**preprocess**
+
+```bash
+screen
+mkdir -p logfiles/baseline && bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes/ -o data/AMR/baseline 2>&1 | tee logfiles/baseline/preprocessing.log
+```
+CTRL-a d to detach from screen
+
+**train**
+
+```bash
+screen
+docker run -v ~/data/volume_2/data:/am-parser-app/data --gpus all -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container-gpu am-parser bash
+mkdir -p logfiles/baseline && python -u train.py jsonnets/single/untrained_embeddings/AMR2017.jsonnet .jsonnet -s models/AMR/baseline  -f --file-friendly-logging --comet <your comet token> --project <comet project to log to>    2>&1 | tee logfiles/baseline/training.log
+```
+
+Note that once you're running in the docker container you can't detach from the screen anymore, but you can just close the window if you want.
+
+
 
 
 ## Bart
