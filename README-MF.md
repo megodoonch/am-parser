@@ -2,7 +2,9 @@
 
 The am-tools.jar here is Bart's
 
-## setting up surfsara server
+## Surfsara server
+
+### Setting up surfsara server
 
 * make an ssh key with `ssh-keygen` on my computer
 * add it on surfsara account #TODO how?
@@ -44,34 +46,36 @@ The am-tools.jar here is Bart's
     docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container am-parser bash
     docker run -v ~/data/volume_2/data:/am-parser-app/data --gpus all -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container-gpu am-parser bash
     ```
-* test with toy example. consider detaching and looking in ~/data/volume for the data and models it should have written:
+### Test setup with toy example. Consider detaching and looking in ~/data/volume for the data and models it should have written:
 
-preprocess:
+**preprocess:**
 
 ```bash
 mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
 ```
 
-train on CPU, plus some more overrides for illustrative purposes:
+**train on CPU, plus some more overrides for illustrative purposes:**
 
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging "{trainer: {\"num_epochs\": 2, \"patience\" : null, \"cuda_device\": -1, }}"   2>&1 | tee logfiles/example/training.log
 ```
 
-train on GPU:
+**train on GPU:**
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 ```
 
+### Little Prince
+
 ```bash
 mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/little_prince.jsonnet -s models/AMR/little_prince --comet <comet token> --project am-parser -f --file-friendly-logging 2>&1 | tee logfiles/little_prince/training.log
 ```
 
-#### Real baseline corpus
+### Real baseline corpus
 
-**preprocess**
+**preprocess (need more memory than Surfsara provides)**
 
 ```bash
 screen
@@ -92,7 +96,7 @@ Note that once you're running in the docker container you can't detach from the 
 
 
 
-## Bart
+## Bart's scripts
 
 ### scripts for Little Prince
 
