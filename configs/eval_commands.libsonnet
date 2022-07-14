@@ -33,6 +33,7 @@ local sdp_regexes = {
     "LittlePrince" : [WORDNET],
     "AMR-2015" : [WORDNET],
     "AMR-2017" : [WORDNET],
+    "AMR-2017-morphemes: : [WORDNET];
     "MRP-DM" : [MTOOL],
     "MRP-PSD" : [MTOOL],
     "MRP-EDS" : [MTOOL],
@@ -78,6 +79,16 @@ local sdp_regexes = {
             "type" : "bash_evaluation_command",
             "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
                 ' --lookup data/AMR/2017/lookup/ --th 10' +
+            '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
+            "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
+                                "R" : [1, "Recall: (?P<value>.+)"],
+                                "F" : [2, "F-score: (?P<value>.+)"]}
+        },
+
+        "AMR-2017-morphemes" : {
+            "type" : "bash_evaluation_command",
+            "command" : 'java -cp '+ALTO_PATH+' de.saar.coli.amrtagging.formalisms.amr.tools.EvaluateCorpus --corpus {system_output} -o {tmp}/ --relabel --wn '+WORDNET+
+                ' --lookup data/AMR/AMR2017morphemes/lookup/ --th 10' +
             '&& python2 '+tool_dir+'/smatch/smatch.py -f {tmp}/parserOut.txt {gold_file} --pr --significant 4 > {tmp}/metrics.txt && cat {tmp}/metrics.txt',
             "result_regexes" : {"P" : [0, "Precision: (?P<value>.+)"],
                                 "R" : [1, "Recall: (?P<value>.+)"],
@@ -164,6 +175,7 @@ local sdp_regexes = {
         "EDS": "+EDS_Smatch_F",
         "AMR-2015": "+AMR-2015_F",
         "AMR-2017": "+AMR-2017_F",
+	"AMR-2017-morphemes": "+AMR-2017-morphemes_F",
         "AMR-2020": "+AMR-2020_F",
         "AMR-example": "+AMR-example_F",
         "LittlePrince": "+LittlePrince_F",

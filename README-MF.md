@@ -2,6 +2,26 @@
 
 The am-tools.jar here is Bart's
 
+## How to train a model on the surfsara server
+
+* ssh into the server
+* start a screen with `screen`
+* see what docker containers are already in existence
+  `docker ps -a`
+* currently, `am-parser-container-gpu` exists and is fully up to date
+* if it's running, attach: `docker attach am-parser-container-gpu`
+* if it's stopped, start it `docker start am-parser-container-gpu` and then attach
+* you should now be in a new terminal starting with `#` instead of `$`.
+* check the location of your preprocessed corpus. Let's suppose the path is `data/AMR/morphemes`.
+* get your comet token from the website (it's in your profile).
+* pick or make a comet project to log to
+* Start the training with:
+
+```bash
+mkdir -p logfiles/morphemes && python -u train.py jsonnets/single/untrained_embeddings/AMR2017-morphemes.jsonnet -s models/AMR/morphemes  -f --file-friendly-logging --comet <your comet token> --project <comet project to log to>    2>&1 | tee logfiles/morphemes/training.log
+```
+
+
 ## Surfsara server
 
 ### Setting up surfsara server
