@@ -39,8 +39,8 @@ local final_encoder_output_dim = 2 * encoder_output_dim + use_freda * 2 * encode
 
 
 #============TASKS==============
-local my_tasks = ["AMR2017"];
-local main_task = "AMR2017";  # what validation metric to pay attention to.
+local my_tasks = ["AMR-2017"];
+local main_task = "AMR-2017";  # what validation metric to pay attention to.
 #===============================
 
 local dataset_reader = {
@@ -50,7 +50,7 @@ local dataset_reader = {
 
 local data_iterator = {
         "type": "same_formalism",
-        "batch_size": 64,
+        "batch_size": 32,
         "formalisms" : my_tasks
     };
 

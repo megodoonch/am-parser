@@ -62,7 +62,7 @@ mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.js
 train on GPU:
 
 ```bash
-mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
+`mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log`
 ```
 
 ```bash
