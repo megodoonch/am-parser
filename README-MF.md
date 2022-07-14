@@ -1,5 +1,7 @@
 # Meaghan's notes
 
+The am-tools.jar here is Bart's
+
 ## Bart
 
 ### scripts for Little Prince
@@ -15,12 +17,13 @@ bash scripts/predict.sh -i example/decomposition/amr-lprince/corpus/test -T AMR-
 ### scripts for toy example
 
 ```bash
-time bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example &> logfiles/example/preprocessing.log
+time bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
 
-python -u train.py jsonnets/morphology/toy.jsonnet -s models/AMR/toy  -f --file-friendly-logging  -o ' {"trainer" : {"cuda_device" :  -1  } }' &> logfiles/example/training.log
+python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 
 bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o parser_output/example/AMR/predict -m models/AMR/example/model.tar.gz &> logfiles/example/predict.log
 ```
+
 
 ## Docker commands
 
@@ -38,16 +41,17 @@ bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o 
 
 `docker run -v $(pwd)/local/directory/to/mount:/where/to/find/it/in/docker/container -it --name my_container_name image_name bash`: create and start container named `my_container_name` using `my_image` and give it access to `local/directory/to/mount`. In the container, you'll find this mounted directory at `/where/to/find/it/in/docker/container` 
 
-The following command will create and start an am-parser container and once you're there, the absolute path `/logfiles` will take you to the `server_logfiles` directory in `am-parser` (the directory where the relevant `Dockerfile` lives)
+This mounts for the docker container all relevant volumes, as you'd find them on your home computer. Use different paths before the colons for the server (probably `/data/volume_2/...`)
 
-```
-docker run -v $(pwd)/server_logfiles:/logfiles -it --name am-parser-container am-parser bash
+```bash
+docker run -v $(pwd)/data:/am-parser-app/data -v $(pwd)/logfiles:/am-parser-app/logfiles -v $(pwd)/downloaded_models:/am-parser-app/downloaded_models -v $(pwd)/models:/am-parser-app/models  -it --name am-parser-container am-parser bash
 ```
 
-`Ctrl-P + Ctrl-Q`: detach from running container
+Ctrl-P + Ctrl-Q: detach from running container
 
 `docker attach CONTAINER_NAME`: reconnect to running container (don't need to use all the options you used to make it)
 
+`exit` (while in docker bash console): detach and stop running container
 
 ## Bug hunting log
 
@@ -62,15 +66,27 @@ Seems switching from `m[range, g] -= 1.0` isn't enough.
 
 According to a warning I saw online from an earlier version of Pytorch, this only became illegal in pytorch 1.6. Am parser documentation recommends 1.1, and it works fine with that.
 
-
+Fix: use PyTorch 1.1 (updated in Dockerfile)
 
 
 ## Getting Docker to play nicely with Pycharm
 
+* install Docker Engine: https://docs.docker.com/engine/install/ubuntu/
+  * I found Docker Desktop's docker daemon wasn't available to PyCharm, so used engine only 
+* let non-root run docker: https://docs.docker.com/engine/install/linux-postinstall/
+  * or try headless mode, below
+* Build the docker image with `docker build -t am-parser .`
+* Make it the interpreter:
+  * Add Interpreter > Docker > Add server (if none exists, and leave the defaults) > choose am-parser image > ok
+* in the terminal, run e.g. `docker run -it --name am-parser-container am-parser bash`
+
+### Headless mode
 * use headless mode https://docs.docker.com/engine/security/rootless/
 * headless mode can't be turned off, must be uninstalled, I think
-* still doesn't work with terminal
+* works. Note the terminal isn't using this as an interpreter though. Need to attach to running docker container (see docker commands above)
 * 
+
+
 
 
 ## Things I tried to make Docker work:

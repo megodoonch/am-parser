@@ -5,12 +5,12 @@
 local evaluate_on_test = false;
 
 # Maximum number of epochs to train for
-local num_epochs = 40;
+local num_epochs = 0;
 
 # early stopping
 # number of epochs to keep training despite not seeing an improvement in dev score
 # local patience = 10;  
-local patience = num_epochs;  # for no early stopping
+local patience = null;  # for no early stopping
 
 # GPU number
 # local device = 0;

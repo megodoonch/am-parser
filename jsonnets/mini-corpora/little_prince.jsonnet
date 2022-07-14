@@ -5,7 +5,8 @@
 local evaluate_on_test = false;
 
 # Maximum number of epochs to train for
-local num_epochs = 40;
+# when testing things out, eventually use a number higher than 10 because before that, Smatch evaluation isn't run
+local num_epochs = 12;
 
 # early stopping
 # number of epochs to keep training despite not seeing an improvement in dev score
