@@ -526,12 +526,11 @@ class AMTrainer(TrainerBase):
                         this_epoch_val_metric = val_metrics[self._validation_metric]
                         self._metric_tracker.add_metric(this_epoch_val_metric)
                     else:
-                        logger.warning(f"Validation metric {self._validation_metric} not found (yet)")
+                        logger.warning(f"Validation metric {self._validation_metric} not found (yet -- some validation metrics are only calculated after a certain number of epochs)")
 
                     if self._metric_tracker.should_stop_early():
                         logger.info("Ran out of patience.  Stopping training.")
                         break
-
 
             self._tensorboard.log_metrics(train_metrics,
                                           val_metrics=val_metrics,
@@ -590,6 +589,7 @@ class AMTrainer(TrainerBase):
         best_model_state = self._checkpointer.best_model_state()
         if best_model_state:
             self.model.load_state_dict(best_model_state)
+
 
         return metrics
 

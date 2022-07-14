@@ -5,7 +5,7 @@
 local evaluate_on_test = false;
 
 # Maximum number of epochs to train for
-local num_epochs = 0;
+local num_epochs = 12;
 
 # early stopping
 # number of epochs to keep training despite not seeing an improvement in dev score

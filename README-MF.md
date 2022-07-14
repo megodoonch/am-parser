@@ -2,6 +2,57 @@
 
 The am-tools.jar here is Bart's
 
+## setting up surfsara server
+
+* make an ssh key with `ssh-keygen` on my computer
+* add it on surfsara account #TODO how?
+* wait
+* start a screen at home: `screen`
+* connect to server: `ssh mfowlie@145.38.188.151`
+* install docker and git if nec
+* get my version of am-parser
+  * for the first time:
+    ```bash
+    git clone https://github.com/megodoonch/am-parser.git
+    cd am-parser
+    git checkout with_morpheme_splitter
+    ```
+  * later:
+    ```bash
+    cd am-parser
+    git pull  
+    ```
+* move Bart's `am-tools.jar` to server:
+  * in a separate terminal:
+    ```bash
+    scp am-tools.jar mfowlie@145.38.188.151:~/am-parser
+    ```
+    
+* Build docker image:
+  * if you want to keep the last one, retag the old one if nec, e.g. as version 1.1
+  * `docker tag am-parser am-parser:1.1`
+  * build new one, optionally with a version tag (default `latest`):
+    ```bash
+    docker build -t am-parser .
+    docker build -t am-parser:latest -t am-parser:1.2 .
+    ```
+* start a screen on server: `screen`
+
+* Run docker container (start a screen first!):
+    ```bash
+    docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v $(pwd)/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container am-parser bash
+    ```
+* test with toy example. consider detaching and looking in ~/data/volume for the data and models it should have written:
+
+```bash
+mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
+
+mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
+
+bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o parser_output/example/AMR/predict -m models/AMR/example/model.tar.gz &> logfiles/example/predict.log
+```
+
+
 ## Bart
 
 ### scripts for Little Prince
@@ -17,9 +68,9 @@ bash scripts/predict.sh -i example/decomposition/amr-lprince/corpus/test -T AMR-
 ### scripts for toy example
 
 ```bash
-time bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
+mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
 
-python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
+mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 
 bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o parser_output/example/AMR/predict -m models/AMR/example/model.tar.gz &> logfiles/example/predict.log
 ```
