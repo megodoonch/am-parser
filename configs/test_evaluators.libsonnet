@@ -108,7 +108,7 @@ function (dataset_reader, data_iterator) {
                 "k" : k,
                 "threads" : 8,
                 "give_up": give_up,
-                "evaluation_command" : eval_commands['commands']['AMR-example']  # TODO MF should this be 2017?
+                "evaluation_command" : eval_commands['commands']['AMR-example']
         }
 
   }]],

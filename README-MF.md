@@ -10,6 +10,7 @@ The am-tools.jar here is Bart's
 * start a screen at home: `screen`
 * connect to server: `ssh mfowlie@145.38.188.151`
 * install docker and git if nec
+* may need to install nvidia container toolkit: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#installing-on-ubuntu-and-debian
 * get my version of am-parser
   * for the first time:
     ```bash
@@ -38,17 +39,35 @@ The am-tools.jar here is Bart's
     ```
 * start a screen on server: `screen`
 
-* Run docker container (start a screen first!):
+* Run docker container (start a screen first!) with or without gpu enabled:
     ```bash
-    docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v $(pwd)/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container am-parser bash
+    docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container am-parser bash
+    docker run -v ~/data/volume_2/data:/am-parser-app/data --gpus all -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -it --name am-parser-container-gpu am-parser bash
     ```
 * test with toy example. consider detaching and looking in ~/data/volume for the data and models it should have written:
 
+preprocess:
+
 ```bash
 mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
+```
 
+train on GPU:
+
+```bash
+mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging "{trainer: {\"num_epochs\": 2, \"patience\" : null, \"cuda_device\": -1, }}"   2>&1 | tee logfiles/example/training.log
+```
+
+train on CPU, plus some more overrides for illustrative purposes:
+
+```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
+```
 
+predict:
+
+
+```bash
 bash scripts/predict.sh -i example/decomposition/amr/corpus/test -T AMR-2017 -o parser_output/example/AMR/predict -m models/AMR/example/model.tar.gz &> logfiles/example/predict.log
 ```
 

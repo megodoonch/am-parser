@@ -13,8 +13,8 @@ local num_epochs = 12;
 local patience = null;  # for no early stopping
 
 # GPU number
-# local device = 0;
-local device = -1;  # for CPU only
+local device = 0;
+# local device = -1;  # for CPU only
 
 # paths to the rest of the configuration files
 local test_evaluators = import '../../configs/test_evaluators.libsonnet';
@@ -112,6 +112,7 @@ local data_iterator = {
     "evaluate_on_test" : evaluate_on_test,
     [if evaluate_on_test == true then "test_evaluators" else null]: [test_evaluators(dataset_reader, data_iterator)[main_task]],
     # if set to, when training is done, call evaluation on test sets with best model as described here.
+    # "test_evaluators" : [test_evaluators(dataset_reader, data_iterator)[main_task]],
     #==========================================================================
 
     "trainer": {

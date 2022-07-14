@@ -475,6 +475,10 @@ class AMTrainer(TrainerBase):
         """
         Trains the supplied model with the supplied parameters.
         """
+        if self._num_epochs < 1:
+            logger.error(f"Number of epochs to train is set to {self._num_epochs}. Exiting")
+            exit(1)
+
         try:
             epoch_counter = self._restore_checkpoint()
         except RuntimeError:
