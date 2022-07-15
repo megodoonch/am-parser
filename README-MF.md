@@ -95,17 +95,21 @@ mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.js
 mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/little_prince.jsonnet -s models/AMR/little_prince --comet <comet token> --project am-parser -f --file-friendly-logging 2>&1 | tee logfiles/little_prince/training.log
 ```
 
-### Real baseline corpus
+### Real corpora
 
-**preprocess (need more memory than Surfsara provides)**
+#### Preprocess morpheme splitter version (need more memory than Surfsara provides)
+
+Allocate 600G memory and 50 threads
 
 ```bash
 screen
-mkdir -p logfiles/baseline && bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes/ -o data/AMR/baseline 2>&1 | tee logfiles/baseline/preprocessing.log
+mkdir -p logfiles/morphemes && time bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes/ -m 600G -t 50 -o data/AMR/morphemes 2>&1 | tee logfiles/baseline/preprocessing.log
 ```
 CTRL-a d to detach from screen
 
-**train**
+#### Train big corpora
+
+**Baseline**
 
 ```bash
 screen
