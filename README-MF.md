@@ -99,11 +99,11 @@ mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/litt
 
 #### Preprocess morpheme splitter version (need more memory than Surfsara provides)
 
-Allocate 600G memory and 50 threads
+Allocate 600G memory and 50 threads. Only use screen within the server.
 
 ```bash
 screen
-mkdir -p logfiles/morphemes && time bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes/ -m 600G -t 50 -o data/AMR/morphemes 2>&1 | tee logfiles/baseline/preprocessing.log
+mfowlie@falken-4:~/am-parser-my-fork$ mkdir -p logfiles/morphemes && bash scripts/preprocess_amr.sh -t 40 -m 600G -d ~/corpora/AMR2017morphemes/ -o data/AMR/morphemes/ 2>&1 | tee logfiles/morphemes/preprocessing.log
 ```
 CTRL-a d to detach from screen
 
