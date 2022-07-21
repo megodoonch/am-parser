@@ -96,6 +96,23 @@ function (dataset_reader, data_iterator) {
 
   }]],
 
+   "AMR-2017-morphemes" :  [ ["AMR-2017-morphemes",{ #prefix used for evaluation metric
+        "type": "standard_evaluator",
+        "formalism" : "AMR-2017-morphemes",
+        "system_input" : "data/AMR/AMR2017morphemes/test/test.amconll",
+        "gold_file": "data/AMR/AMR2017morphemes/test/goldAMR.txt",
+        "predictor" : {
+                "type" : "amconll_predictor",
+                "dataset_reader" : dataset_reader,
+                "data_iterator" : data_iterator,
+                "k" : k,
+                "threads" : 8,
+                "give_up": give_up,
+                "evaluation_command" : eval_commands['commands']['AMR-2017']
+        }
+
+  }]],
+
     "AMR-example" :  [ ["AMR-example",{ #prefix used for evaluation metric
         "type": "standard_evaluator",
         "formalism" : "AMR-example",

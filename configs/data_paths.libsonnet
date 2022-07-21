@@ -24,6 +24,7 @@ local AMR_prefix = "data/AMR/";
         "LittlePrince" : AMR_prefix+"little-prince/output/train/train.amconll",
         "AMR-2015" : AMR_prefix+"2015/train/train.amconll",
         "AMR-2017" : AMR_prefix+"2017/train/train.amconll",
+	"AMR-2017-morphemes" :  AMR_prefix+"AMR2017morphemes/train/train.amconll",
         "AMR-2020" : AMR_prefix+"2020/train/train.amconll",
         "EDS" : "data/EDS/train/train.amconll",
         #UD:
@@ -51,6 +52,7 @@ local AMR_prefix = "data/AMR/";
         "LittlePrince" : AMR_prefix+"little-prince/output/gold-dev/gold-dev.amconll",
         "AMR-2015" : AMR_prefix+"2015/gold-dev/gold-dev.amconll",
         "AMR-2017" : AMR_prefix+"2017/gold-dev/gold-dev.amconll",
+	"AMR-2017" : AMR_prefix+"AMR2017morphemes/gold-dev/gold-dev.amconll",
         "AMR-2020" : AMR_prefix+"2020/gold-dev/gold-dev.amconll",
         "EDS" : "data/EDS/gold-dev/gold-dev.amconll",
 

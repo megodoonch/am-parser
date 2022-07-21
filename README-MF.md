@@ -2,7 +2,31 @@
 
 The am-tools.jar here is Bart's
 
-## setting up surfsara server
+## How to train a model on the surfsara server
+
+* ssh into the server
+* start a screen with `screen`
+* see what docker containers are already in existence
+  `docker ps -a`
+* currently, `am-parser-container-gpu` exists but is not fully up to date
+  * missing the updated config files for the morpheme model
+* if it's running, attach: `docker attach am-parser-container-gpu`
+* if it's stopped, start it `docker start am-parser-container-gpu` and then attach
+* if you need to remake it, see below, specifically `git pull` and `docker build...` and `docker run...`
+* you should now be in a new terminal starting with `#` instead of `$`.
+* check the location of your preprocessed corpus. Let's suppose the path is `data/AMR/morphemes`.
+* get your comet token from the website (it's in your profile).
+* pick or make a comet project to log to
+* Start the training with:
+
+```bash
+mkdir -p logfiles/morphemes && python -u train.py jsonnets/single/untrained_embeddings/AMR2017-morphemes.jsonnet -s models/AMR/morphemes  -f --file-friendly-logging --comet <your comet token> --project <comet project to log to>    2>&1 | tee logfiles/morphemes/training.log
+```
+
+
+## Surfsara server
+
+### Setting up surfsara server
 
 * make an ssh key with `ssh-keygen` on my computer
 * add it on surfsara account #TODO how?
@@ -44,42 +68,48 @@ The am-tools.jar here is Bart's
     docker run -v ~/data/volume_2/data:/am-parser-app/data -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models  -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container am-parser bash
     docker run -v ~/data/volume_2/data:/am-parser-app/data --gpus all -v ~/data/volume_2/logfiles:/am-parser-app/logfiles -v ~/data/volume_2/downloaded_models:/am-parser-app/downloaded_models -v ~/data/volume_2/models:/am-parser-app/models -v ~/data/volume_2/corpora:/am-parser-app/corpora -it --name am-parser-container-gpu am-parser bash
     ```
-* test with toy example. consider detaching and looking in ~/data/volume for the data and models it should have written:
+### Test setup with toy example. Consider detaching and looking in ~/data/volume for the data and models it should have written:
 
-preprocess:
+**preprocess:**
 
 ```bash
 mkdir -p logfiles/example && bash scripts/preprocess_amr.sh -d example/decomposition/amr/ -o data/AMR/example 2>&1 | tee logfiles/example/preprocessing.log
 ```
 
-train on CPU, plus some more overrides for illustrative purposes:
+**train on CPU, plus some more overrides for illustrative purposes:**
 
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging "{trainer: {\"num_epochs\": 2, \"patience\" : null, \"cuda_device\": -1, }}"   2>&1 | tee logfiles/example/training.log
 ```
 
-train on GPU:
+**train on GPU:**
 
 ```bash
 mkdir -p logfiles/example && python -u train.py jsonnets/mini-corpora/example.jsonnet -s models/AMR/toy  -f --file-friendly-logging 2>&1 | tee logfiles/example/training.log
 ```
 
+### Little Prince
+
 ```bash
 mkdir -p logfiles/little_prince && python -u train.py jsonnets/mini-corpora/little_prince.jsonnet -s models/AMR/little_prince --comet <comet token> --project am-parser -f --file-friendly-logging 2>&1 | tee logfiles/little_prince/training.log
 ```
 
-#### Real baseline corpus
+### Real corpora
 
-**preprocess**
+#### Preprocess morpheme splitter version (need more memory than Surfsara provides)
+
+Allocate 600G memory and 50 threads. Only use screen within the server.
 
 ```bash
 screen
-mkdir -p logfiles/baseline && bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes/ -o data/AMR/baseline 2>&1 | tee logfiles/baseline/preprocessing.log
+mfowlie@falken-4:~/am-parser-my-fork$ mkdir -p logfiles/morphemes && bash scripts/preprocess_amr.sh -t 40 -m 600G -d ~/corpora/AMR2017morphemes/ -o data/AMR/morphemes/ 2>&1 | tee logfiles/morphemes/preprocessing.log
 ```
 CTRL-a d to detach from screen
 
-**train**
+#### Train big corpora
+
+**Baseline**
 
 ```bash
 screen
@@ -100,7 +130,7 @@ mkdir -p logfiles/morphemes_july_20/ && bash scripts/preprocess_amr.sh -d ~/corp
 CTRL-a d to detach from screen
 
 
-## Bart
+## Bart's scripts
 
 ### scripts for Little Prince
 
