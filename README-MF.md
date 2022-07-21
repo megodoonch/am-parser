@@ -89,7 +89,15 @@ mkdir -p logfiles/baseline && python -u train.py jsonnets/single/untrained_embed
 
 Note that once you're running in the docker container you can't detach from the screen anymore, but you can just close the window if you want.
 
+#### Real corpus
 
+**preprocess**
+
+```bash
+screen
+mkdir -p logfiles/morphemes_july_20/ && bash scripts/preprocess_amr.sh -d ~/corpora/AMR2017morphemes_july_20/ -o data/AMR/morphemes_july_20/  -t 40 -m 600G 2>&1 | tee logfiles/morphemes_july_20preprocessing.log
+```
+CTRL-a d to detach from screen
 
 
 ## Bart

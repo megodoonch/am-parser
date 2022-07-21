@@ -147,6 +147,7 @@ check_for_gpu(cuda_device)
 params.to_file(os.path.join(serialization_dir, CONFIG_NAME))
 
 evaluate_on_test = params.pop_bool("evaluate_on_test", False)
+test_evaluators = []
 
 if evaluate_on_test:
     test_evaluators = params.pop("test_evaluators",[])
@@ -227,7 +228,7 @@ except KeyboardInterrupt:
     raise
 
 # Evaluate
-if evaluate_on_test and test_evaluators:
+if evaluate_on_test and len(test_evaluators) > 0:
     logger.info("The model will be evaluated using the best epoch weights.")
     overall_metrics = dict()
     for name,evaluator in test_evaluators:

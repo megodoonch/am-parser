@@ -23,13 +23,16 @@
 usage="Preprocess an AMR corpus, in ACL 2019 style.\n\n
 
 Arguments: \n
-\n\t     -d  main directory where corpus lives
+\n\t   -d  main directory where corpus lives
 \n\t	 -m  memory limit to be used for the task (default: 6G)
-\n\t	 -o  directory where output files will be put (default: new 'output'folder in main directory)
+\n\t	 -o  directory where output files will be put (default: new 'output' folder in main directory)
 \n\t	 -t  number of threads (default: 1)
+\n\t   -v  (flag) make corefSplit print all remaining graph IDs after every step
 "
 
-while getopts "d:m:o:t:h" opt; do
+verbose=""
+
+while getopts "d:m:o:t:hv" opt; do
     case $opt in
 	h) echo -e $usage
 	   exit
@@ -42,6 +45,8 @@ while getopts "d:m:o:t:h" opt; do
 	   ;;
 	t) threads="$OPTARG"
 	   ;;
+	v) verbose="-v"
+	  ;;
        	\?) echo "Invalid option -$OPTARG" >&2
 	    ;;
     esac
@@ -79,6 +84,8 @@ devAltodata=$outputPath/alto/dev/
 evalDevAltodata=$outputPath/alto/evalDev/
 testAltodata=$outputPath/alto/test/
 
+echo "Starting $(date)" >> "$log"
+
 #alto="alto-2.3-SNAPSHOT-jar-with-dependencies.jar"
 alto="am-tools.jar"
 
@@ -110,7 +117,7 @@ bash scripts/setup_AMR.sh
 
 NNdataCorpusName="namesDatesNumbers_AlsFixed_sorted.corpus"  # from which we get the NN training data
 evalDataCorpusName="finalAlto.corpus"                        # from which we get the dev and test evaluation data
-trainMinuteLimit=600                                         # limit for generating NN training data
+trainMinuteLimit=180                                         # limit for generating NN training data
 devMinuteLimit=20                                            # limit for generating NN dev data
 if [ "$threads" = "" ]; then
     threads=1
@@ -128,32 +135,32 @@ wordnet="downloaded_models/wordnet3.0/dict/"
 conceptnet=""
 
 # raw training data, preprocess, alto format.
-preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
-printf "preprocessing training set and putting it into Alto-readable format\n"
-printf "preprocessing training set and putting it into Alto-readable format\n" >> $log
+preprocessTrainCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/training/ -o $trainAltodata --corefSplit -t $threads --minutes $trainMinuteLimit -w $wordnet $conceptnet -pos $posTagger $verbose >>$log 2>&1"
+printf "preprocessing training set and putting it into Alto-readable format %s\n" "$(date)"
+printf "preprocessing training set and putting it into Alto-readable format %s\n" "$(date)" >> $log
 echo $preprocessTrainCMD >> $log
 eval $preprocessTrainCMD
 
 # TODO same for nndev
-preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet $conceptnet -pos $posTagger >>$log 2>&1"
-printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n"
-printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format\n" >> $log
+preprocessNNDevCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.RawAMRCorpus2TrainingData -i $rawAMRCorpus/dev/ -o $devAltodata --corefSplit -t $threads --minutes $devMinuteLimit -w $wordnet $conceptnet -pos $posTagger $verbose >>$log 2>&1"
+printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format %s\n" "$(date)"
+printf "\npreprocessing NNdev set (dev set for neural network optimisation) and putting it into Alto-readable format %s\n" "$(date)" >> $log
 echo $preprocessNNDevCMD >> $log
 eval $preprocessNNDevCMD
 
 
 # get the dependency trees for the training set
 trainCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $trainAltodata/$NNdataCorpusName -li $trainMinuteLimit -o $trainNNdata -t $threads -pos $posTagger >>$log 2>&1"
-printf "\ngenerating dependency trees for the train set\n"
-printf "\ngenerating dependency trees for the train set\n" >> $log
+printf "\ngenerating dependency trees for the train set %s\n"  "$(date)"
+printf "\ngenerating dependency trees for the train set %s\n"  "$(date)" >> $log
 echo $trainCMD >> $log
 eval $trainCMD
 
 
 # create a words2labelsLookup.txt
 wds2lCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.ConstraintStats $trainNNdata >>$log 2>&1"
-printf "\ncreating words2labelsLookup.txt\n"
-printf "\ncreating words2labelsLookup.txt\n" >> $log
+printf "\ncreating words2labelsLookup.txt %s\n"  "$(date)"
+printf "\ncreating words2labelsLookup.txt %s\n"  "$(date)" >> $log
 echo $wds2lCMD >> $log
 eval $wds2lCMD
 
@@ -162,40 +169,40 @@ cp $trainNNdata/words2labelsLookup.txt $trainAltodata
 
 #get the dependency trees for the dev set
 devCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.DependencyExtractorCLI -c $devAltodata/$NNdataCorpusName -li $devMinuteLimit -o $devNNdata -t $threads -v $trainNNdata -pos $posTagger  >>$log 2>&1"
-printf "\ngenerating dependency trees for the dev set, using graph strings from the training set\n"
-printf "\ngenerating dependency trees for the dev set, using graph strings from the training set\n" >> $log
+printf "\ngenerating dependency trees for the dev set, using graph strings from the training set %s\n"  "$(date)"
+printf "\ngenerating dependency trees for the dev set, using graph strings from the training set %s\n"  "$(date)" >> $log
 echo $devCMD >> $log
 eval $devCMD
 
 
 
-# Raw dev and test to Alto format
+# Raw dev and test to Alto
 
 # dev set
 devRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/dev/ --output $evalDevAltodata >>$log 2>&1"
-printf "\nconverting dev set to Alto format for evaluation\n"
-printf "\nconverting dev set to Alto format for evaluation\n" >> $log
+printf "\nconverting dev set to Alto format for evaluation %s\n"  "$(date)"
+printf "\nconverting dev set to Alto format for evaluation %s\n"  "$(date)" >> $log
 echo $devRawCMD >> $log
 eval $devRawCMD
 
 # test set
 testRawCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.FullProcess --amrcorpus $rawAMRCorpus/test/ --output $testAltodata  >>$log 2>&1"
-printf "\nconverting test set to Alto format for evaluation\n"
-printf "\nconverting test set to Alto format for evaluation\n" >> $log
+printf "\nconverting test set to Alto format for evaluation %s\n"  "$(date)"
+printf "\nconverting test set to Alto format for evaluation %s\n"  "$(date)" >> $log
 echo $testRawCMD >> $log
 eval $testRawCMD
 
 # dev eval input data preprocessing
 devEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $evalDevAltodata -o $evalDevNNdata --stanford-ner-model $nerTagger --tagger-model $posTagger >>$log 2>&1"
-printf "\ngenerating evaluation input (full corpus) for dev data\n"
-printf "\ngenerating evaluation input (full corpus) for dev data\n" >> $log
+printf "\ngenerating evaluation input (full corpus) for dev data %s\n"  "$(date)"
+printf "\ngenerating evaluation input (full corpus) for dev data %s\n"  "$(date)" >> $log
 echo $devEvalCMD  >> $log
 eval $devEvalCMD
 
 # test eval input data preprocessing
 testEvalCMD="java -Xmx$memLimit -cp $alto $datascriptPrefix.MakeDevData -c $testAltodata -o $testNNdata --stanford-ner-model $nerTagger --tagger-model $posTagger >>$log 2>&1"
-printf "\ngenerating evaluation input (full corpus) for test data\n"
-printf "\ngenerating evaluation input (full corpus) for test data\n" >> $log
+printf "\ngenerating evaluation input (full corpus) for test data %s\n"  "$(date)"
+printf "\ngenerating evaluation input (full corpus) for test data %s\n"  "$(date)" >> $log
 echo $testEvalCMD  >> $log
 eval $testEvalCMD
 
@@ -210,25 +217,25 @@ cp $testAltodata/raw.amr $testNNdata/goldAMR.txt
 
 #Create amconll file for training set
 devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $trainNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
-printf "\nGenerate amconll for training data\n"
+printf "\nGenerate amconll for training data %s\n"  "$(date)"
 eval $devamconllCMD
 mv $outputPath/corpus.amconll $outputPath/train.amconll
 
 #Create amconll file for dev set
 devamconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.ToAMConll -c $devNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
-printf "\nGenerate amconll for (gold) dev data\n"
+printf "\nGenerate amconll for (gold) dev data %s\n"  "$(date)"
 eval $devamconllCMD
 mv $outputPath/corpus.amconll $outputPath/gold-dev.amconll
 
 
 #Create empty amconll for (actual) dev set, also called evalDev
 emptyDevAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $evalDevNNdata -o $outputPath --stanford-ner-model $nerTagger >>$log 2>&1"
-printf "\nGenerate empty amconll dev data\n"
+printf "\nGenerate empty amconll dev data %s\n"  "$(date)"
 eval $emptyDevAmconllCMD
 
 #Create empty amconll for test set
 emptyTestAmconllCMD="java -Xmx$memLimit -cp $alto de.saar.coli.amrtagging.formalisms.amr.tools.PrepareTestDataFromFiles -c $testNNdata -o $outputPath --prefix test --stanford-ner-model $nerTagger >>$log 2>&1"
-printf "\nGenerate empty amconll test data\n"
+printf "\nGenerate empty amconll test data %s\n"  "$(date)"
 eval $emptyTestAmconllCMD
 
 #create correct directory structure
@@ -259,9 +266,9 @@ done
 
 
 
-
+printf "Finished %s\n" "$(date)"
 printf "\neverything is in $outputPath\n"
-printf "\namconll files are in $outputPath/$output_subdir"
+printf "\namconll files are in $outputPath/$output_subdir\n"
 
 
 
